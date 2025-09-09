@@ -5,15 +5,15 @@ import connectDB from './configs/db.js'
 import { clerkMiddleware } from '@clerk/express'
 import { serve } from "inngest/express";
 import { inngest ,functions} from './inngest/index.js';
-// import { inngest, functions } from "/inngest/index.js"
+
 
 const app = express();
 const port = 3000;
 
-// console.log(MONGODB_URI);
+
 
 await connectDB()
-// app.use(connectDB())
+
 
 app.use(express.json())
 app.use(cors())
