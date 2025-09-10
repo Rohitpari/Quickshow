@@ -15,7 +15,7 @@ const port = 3000;
 await connectDB()
 
 
-INNGEST_KEY:process.env.INNGEST_SIGNING_KEY
+// INNGEST_KEY:process.env.INNGEST_SIGNING_KEY
 
 app.use(express.json())
 app.use(cors())
