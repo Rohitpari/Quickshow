@@ -6,4 +6,4 @@ email : {type : String, required : true},
 image : {type : String, required : true}, 
 
 })
-const User = mongoose.model('User',userSchema)
+export const User = mongoose.model('User',userSchema)
