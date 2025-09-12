@@ -1,53 +1,58 @@
-// import { User } from "@clerk/express";
-import { User } from "../models/User.js";
+// inngest/index.js
 import { Inngest } from "inngest";
+import mongoose from "mongoose";
+import connectDB from "../configs/db.js";
+import { User } from "../models/User.js";
 
 export const inngest = new Inngest({ id: "movie-ticket-booking" });
 
-// Inngest Function to save user to a database
+// ensure DB connected in every function
+const ensureDB = async () => {
+  if (mongoose.connection.readyState === 0) {
+    await connectDB();
+  }
+};
+
 const syncUserCreation = inngest.createFunction(
   { id: "sync-user-from-clerk" },
   { event: "clerk/user.created" },
-  async ( {event} ) => {
-    const { id, first_name, last_name, email_addresses, Image_url } = event.data;
-    const userData = {
+  async ({ event }) => {
+    await ensureDB();
+    const { id, first_name, last_name, email_addresses, image_url } = event.data;
+    await User.create({
       _id: id,
       email: email_addresses[0].email_address,
-      name: first_name + " " + last_name,
-      Image: Image_url,
-    };
-    await User.create(userData);
+      name: `${first_name} ${last_name}`,
+      image: image_url, // notice lowercase
+    });
   }
 );
 
-// Inngest Function to delete user from database
-const syncUserdeletion = inngest.createFunction(
+const syncUserDeletion = inngest.createFunction(
   { id: "delete-user-with-clerk" },
   { event: "clerk/user.deleted" },
   async ({ event }) => {
-    const { id } = event.data;
-    await User.findByIdAndDelete(id);
+    await ensureDB();
+    await User.findByIdAndDelete(event.data.id);
   }
 );
 
-// Inngest Function to update user data in database
 const syncUserUpdation = inngest.createFunction(
   { id: "update-user-with-clerk" },
   { event: "clerk/user.updated" },
   async ({ event }) => {
-    const { id, first_name, last_name, email_addresses, Image_url } = event.data;
-
-    // update without trying to change _id
+    await ensureDB();
+    const { id, first_name, last_name, email_addresses, image_url } = event.data;
     await User.findByIdAndUpdate(
       id,
       {
         email: email_addresses[0].email_address,
-        name: first_name + " " + last_name,
-        Image: Image_url,
+        name: `${first_name} ${last_name}`,
+        image: image_url,
       },
-      { new: true } // optional: returns updated doc
+      { new: true }
     );
   }
 );
 
-export const functions = [syncUserUpdation, syncUserdeletion, syncUserCreation];
+export const functions = [syncUserCreation, syncUserDeletion, syncUserUpdation];
