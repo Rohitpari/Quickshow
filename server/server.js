@@ -1,10 +1,12 @@
 import express from 'express'
+import mongoose from 'mongoose'
 import cors from 'cors'
 import 'dotenv/config';
 import connectDB from './configs/db.js'
 import { clerkMiddleware } from '@clerk/express'
 import { serve } from "inngest/express";
 import { inngest ,functions} from './inngest/index.js';
+import mongoose from 'mongoose';
 
 
 const app = express();
@@ -12,9 +14,12 @@ const port = 3000;
 
 
 
-
+if(mongoose.connection.readyState === 0){
 await connectDB()
+}
 
+
+console.log(connectDB);
 
 
 
